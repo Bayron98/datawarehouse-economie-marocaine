@@ -1,5 +1,5 @@
 export function renderChartPanel(container, timeSeries) {
-  // Un graphique par indicateur
+  // Un graphique par indicateur, chaque graphique dans une carte séparée
   container.innerHTML = timeSeries.series.map((serie, idx) => `
     <div class="chart-group">
       <h2>${serie.label}</h2>
