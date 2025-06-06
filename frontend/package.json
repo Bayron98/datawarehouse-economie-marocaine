@@ -1,0 +1,13 @@
+{
+  "name": "economie-marocaine-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard moderne pour l'analyse de l'économie marocaine avec Chart.js",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "live-server public"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "author": "",
+  "license": "MIT"
+}

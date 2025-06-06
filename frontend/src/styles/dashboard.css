@@ -1,0 +1,66 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f4f6fa;
+  margin: 0;
+  color: #222;
+}
+header {
+  background: #1a237e;
+  color: #fff;
+  padding: 2rem 1rem 1rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px #0001;
+}
+header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+}
+nav {
+  margin-top: 1rem;
+}
+.indicator-card {
+  display: inline-block;
+  background: #fff;
+  margin: 1rem;
+  padding: 1.5rem 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px #0002;
+  min-width: 180px;
+  text-align: center;
+}
+.indicator-card .value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+.indicator-card .trend.up { color: #388e3c; }
+.indicator-card .trend.down { color: #d32f2f; }
+#charts {
+  margin: 2rem auto;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px #0001;
+  padding: 2rem;
+}
+#datatable {
+  margin: 2rem auto;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px #0001;
+  padding: 2rem;
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: right;
+}
+th { background: #f0f0f8; }
+tr:hover { background: #f5f5fc; }
