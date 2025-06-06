@@ -41,11 +41,19 @@ function getLastValid(values) {
 
 export async function renderDashboard(root) {
   root.innerHTML = `
-    <header>
-      <h1>Tableau de bord - Économie Marocaine</h1>
-      <nav>
-        <button id="refresh-btn">Rafraîchir</button>
+    <header id="main-header">
+      <div class="header-left">
+        <img src="./Flag_of_Morocco.svg" alt="Drapeau Maroc" class="logo" style="height:32px;width:auto;margin-right:0.7rem;vertical-align:middle;box-shadow:0 2px 8px #0002;border-radius:3px;" />
+        <span class="header-title">Économie Marocaine</span>
+      </div>
+      <nav class="header-nav">
+        <button id="refresh-btn" title="Rafraîchir">⟳</button>
+        <button id="scroll-kpi" class="nav-btn">Indicateurs</button>
+        <button id="scroll-bi" class="nav-btn">BI</button>
+        <button id="scroll-charts" class="nav-btn">Graphiques</button>
+        <button id="scroll-table" class="nav-btn">Tableau</button>
       </nav>
+      <div id="header-section-indicator"></div>
     </header>
     <section id="dashboard-sources">
       <b>Sources de données :</b> Toutes les données affichées proviennent exclusivement de la Banque Mondiale (World Bank Open Data), extraites automatiquement via API et fichiers CSV. Dernière mise à jour : juin 2025.
@@ -56,7 +64,48 @@ export async function renderDashboard(root) {
     <section id="datatable" class="section-block"></section>
   `;
 
+  // Navigation scroll vers section
+  document.getElementById('scroll-kpi').onclick = () => document.getElementById('kpi-cards').scrollIntoView({behavior:'smooth'});
+  document.getElementById('scroll-bi').onclick = () => document.getElementById('bi-panels').scrollIntoView({behavior:'smooth'});
+  document.getElementById('scroll-charts').onclick = () => document.getElementById('charts').scrollIntoView({behavior:'smooth'});
+  document.getElementById('scroll-table').onclick = () => document.getElementById('datatable').scrollIntoView({behavior:'smooth'});
   document.getElementById('refresh-btn').onclick = () => location.reload();
+
+  // Affichage dynamique de la section courante dans la topbar (prend en compte la hauteur réelle de la topbar)
+  const sectionIndicator = document.getElementById('header-section-indicator');
+  const sectionNames = [
+    {id:'kpi-cards', label:'Indicateurs'},
+    {id:'bi-panels', label:'BI'},
+    {id:'charts', label:'Graphiques'},
+    {id:'datatable', label:'Tableau'}
+  ];
+  function getCurrentSection() {
+    // Nouvelle logique : section dont le centre est le plus proche du centre de la fenêtre (viewport)
+    const topbar = document.querySelector('header');
+    const topbarHeight = topbar ? topbar.offsetHeight : 0;
+    const viewportCenter = window.scrollY + topbarHeight + window.innerHeight / 2;
+    let minDelta = Infinity;
+    let current = sectionNames[0];
+    for (const s of sectionNames) {
+      const el = document.getElementById(s.id);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const elCenter = rect.top + window.scrollY + rect.height / 2;
+        const delta = Math.abs(elCenter - viewportCenter);
+        if (delta < minDelta) {
+          minDelta = delta;
+          current = s;
+        }
+      }
+    }
+    return current;
+  }
+  function updateSectionIndicator() {
+    const current = getCurrentSection();
+    sectionIndicator.innerHTML = `<span class="section-indicator">${current.label}</span>`;
+  }
+  window.addEventListener('scroll', updateSectionIndicator);
+  updateSectionIndicator();
 
   // Récupérer toutes les séries temporelles pour enrichir les KPIs
   const timeSeries = await fetchTimeSeries();
@@ -110,6 +159,21 @@ export async function renderDashboard(root) {
 
   // Affichage des graphiques (séparés)
   renderChartPanel(document.getElementById('charts'), timeSeries);
-  // Affichage du tableau de données
-  renderDataTable(document.getElementById('datatable'), timeSeries);
+  // Affichage du tableau de données avec pagination
+  renderDataTable(document.getElementById('datatable'), timeSeries, 1, 10);
+
+  // Chercher la date de mise à jour la plus récente dans les fichiers de données (injectée dynamiquement)
+  // Valeur obtenue dynamiquement côté serveur ou build : 6 juin 2025 à 21:12
+  // Récupération automatisée de la date de dernière modification du fichier de données le plus récent
+  let dateMaj = '';
+  try {
+    const res = await fetch('http://localhost:5000/api/last_update');
+    if (res.ok) {
+      const data = await res.json();
+      dateMaj = data.last_update;
+    }
+  } catch (e) {
+    dateMaj = 'indisponible';
+  }
+  document.getElementById('dashboard-sources').innerHTML = `<b>Sources de données :</b> Toutes les données affichées proviennent exclusivement de la Banque Mondiale (World Bank Open Data), extraites automatiquement via API et fichiers CSV. Dernière mise à jour : <b>${dateMaj}</b>.`;
 }

@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, Response, request
 import mysql.connector
+import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -53,6 +55,27 @@ def timeseries():
         series.append({'label': nom, 'values': values, 'color': '#'+code[-6:]})
     conn.close()
     return jsonify({'years': years, 'series': series})
+
+@app.route('/api/last_update')
+def last_update():
+    data_dir = os.path.join(os.path.dirname(__file__), '../data')
+    latest_time = None
+    latest_file = None
+    for fname in os.listdir(data_dir):
+        if fname.endswith('.csv') and fname.startswith('transformed_'):
+            fpath = os.path.join(data_dir, fname)
+            mtime = os.path.getmtime(fpath)
+            if latest_time is None or mtime > latest_time:
+                latest_time = mtime
+                latest_file = fname
+    if latest_time:
+        dt = datetime.fromtimestamp(latest_time)
+        # Format français : 6 juin 2025 à 21:12
+        mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+        date_str = f"{dt.day} {mois[dt.month-1]} {dt.year} à {dt.hour:02d}:{dt.minute:02d}"
+    else:
+        date_str = 'indisponible'
+    return jsonify({'last_update': date_str})
 
 if __name__ == '__main__':
     app.run(debug=True)
