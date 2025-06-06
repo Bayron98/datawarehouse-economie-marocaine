@@ -1,0 +1,2 @@
+# Ce dossier contiendra les fichiers extraits et transformés temporairement par l'ETL.
+# Il peut être vidé/réinitialisé à chaque exécution du pipeline.
