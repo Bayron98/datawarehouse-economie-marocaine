@@ -47,7 +47,7 @@ export async function renderDashboard(root) {
         <span class="header-title">Économie Marocaine</span>
       </div>
       <nav class="header-nav">
-        <button id="refresh-btn" title="Rafraîchir">⟳</button>
+        <button id="refresh-btn" class="refresh-btn" title="Rafraîchir les données">🔄 Rafraîchir les données</button>
         <button id="scroll-kpi" class="nav-btn">Indicateurs</button>
         <button id="scroll-bi" class="nav-btn">BI</button>
         <button id="scroll-charts" class="nav-btn">Graphiques</button>
@@ -69,7 +69,38 @@ export async function renderDashboard(root) {
   document.getElementById('scroll-bi').onclick = () => document.getElementById('bi-panels').scrollIntoView({behavior:'smooth'});
   document.getElementById('scroll-charts').onclick = () => document.getElementById('charts').scrollIntoView({behavior:'smooth'});
   document.getElementById('scroll-table').onclick = () => document.getElementById('datatable').scrollIntoView({behavior:'smooth'});
-  document.getElementById('refresh-btn').onclick = () => location.reload();
+  document.getElementById('refresh-btn').onclick = async () => {
+    // Création du popup animé
+    let popup = document.createElement('div');
+    popup.className = 'refresh-popup';
+    popup.innerHTML = `
+      <div class="refresh-popup-content">
+        <div class="refresh-spinner"></div>
+        <div class="refresh-text">Mise à jour des données en cours…</div>
+      </div>
+    `;
+    document.body.appendChild(popup);
+    // Appel backend pour relancer le pipeline ETL
+    try {
+      const res = await fetch('http://localhost:5000/api/refresh_etl', {method:'POST'});
+      if (res.ok) {
+        popup.querySelector('.refresh-text').innerHTML = 'Données à jour !';
+        popup.querySelector('.refresh-spinner').classList.add('success');
+        setTimeout(()=>{
+          popup.remove();
+          location.reload();
+        }, 1200);
+      } else {
+        popup.querySelector('.refresh-text').innerHTML = 'Erreur lors de la mise à jour.';
+        popup.querySelector('.refresh-spinner').classList.add('fail');
+        setTimeout(()=>popup.remove(), 2000);
+      }
+    } catch(e) {
+      popup.querySelector('.refresh-text').innerHTML = 'Erreur de connexion au serveur.';
+      popup.querySelector('.refresh-spinner').classList.add('fail');
+      setTimeout(()=>popup.remove(), 2000);
+    }
+  };
 
   // Affichage dynamique de la section courante dans la topbar (prend en compte la hauteur réelle de la topbar)
   const sectionIndicator = document.getElementById('header-section-indicator');

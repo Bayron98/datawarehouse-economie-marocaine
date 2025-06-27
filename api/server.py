@@ -2,6 +2,8 @@ from flask import Flask, jsonify, Response, request
 import mysql.connector
 import os
 from datetime import datetime
+import subprocess
+import threading
 
 app = Flask(__name__)
 
@@ -76,6 +78,16 @@ def last_update():
     else:
         date_str = 'indisponible'
     return jsonify({'last_update': date_str})
+
+@app.route('/api/refresh_etl', methods=['POST'])
+def refresh_etl():
+    # Lancement du pipeline ETL (main.py) dans un thread pour ne pas bloquer Flask
+    def run_etl():
+        subprocess.run(['python', 'main.py'])
+    thread = threading.Thread(target=run_etl)
+    thread.start()
+    thread.join()  # On attend la fin pour garantir la fraîcheur
+    return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
     app.run(debug=True)
