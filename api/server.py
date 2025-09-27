@@ -47,14 +47,20 @@ def timeseries():
     indicateurs = cursor.fetchall()
     series = []
     for indic_id, nom, code in indicateurs:
+        # Récupère toutes les valeurs disponibles pour cet indicateur
         cursor.execute("""SELECT dt.annee, f.valeur
                             FROM fait_indicateurs f
                             JOIN dim_date dt ON f.date_id = dt.id
                             WHERE f.indicateur_id = %s
-                            ORDER BY dt.annee
                         """, (indic_id,))
-        values = [row[1] for row in cursor.fetchall()]
-        series.append({'label': nom, 'values': values, 'color': '#'+code[-6:]})
+        rows = cursor.fetchall()
+        # Construire un mapping année -> valeur pour pouvoir aligner sur la liste `years`
+        mapping = {row[0]: row[1] for row in rows}
+        # Pour chaque année de la liste `years`, récupérer la valeur correspondante ou None
+        values = [mapping.get(y, None) for y in years]
+        # Définit une couleur safe à partir du code si possible
+        color = '#'+(code[-6:] if code and len(code) >= 6 else '000000')
+        series.append({'label': nom, 'values': values, 'color': color})
     conn.close()
     return jsonify({'years': years, 'series': series})
 

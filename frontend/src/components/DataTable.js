@@ -7,7 +7,9 @@ export function renderDataTable(container, timeSeries) {
   timeSeries.years.forEach((year, i) => {
     html += `<tr><td>${year}</td>`;
     timeSeries.series.forEach(serie => {
-      html += `<td>${serie.values[i]}</td>`;
+      const val = serie.values[i];
+      const display = (val === null || val === undefined) ? '-' : (Number(val).toLocaleString() || val);
+      html += `<td>${display}</td>`;
     });
     html += '</tr>';
   });

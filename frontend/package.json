@@ -7,7 +7,9 @@
     "start": "live-server public"
   },
   "dependencies": {},
-  "devDependencies": {},
-  "author": "",
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  },
+  "author": "Bayron98",
   "license": "MIT"
 }
