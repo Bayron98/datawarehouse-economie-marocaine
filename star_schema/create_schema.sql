@@ -29,4 +29,4 @@ CREATE TABLE IF NOT EXISTS fait_indicateurs (
     FOREIGN KEY (indicateur_id) REFERENCES dim_indicateur(id)
 );
 
--- Ajouter d'autres dimensions selon les besoins (region, secteur, etc.)
+-- On peut ajouter d'autres dimensions selon les besoins (region, secteur, etc.)
